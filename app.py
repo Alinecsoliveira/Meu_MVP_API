@@ -25,65 +25,61 @@ pokemon_tag = Tag(name="Pokémons", description="Cadastro e gerenciamento de Pok
 # Redireciona para /openapi
 @app.get('/', tags=[home_tag])
 def home():
-    """Redireciona para /openapi, tela que permite a escolha do estilo de documentação."""
     return redirect('/openapi')
 
 # Cadastro (POST)
 @app.post('/cadastrar_pokemon', tags=[pokemon_tag],
           responses={"200": PokemonViewSchema, "409": ErrorSchema, "400": ErrorSchema})
 def cadastrar_pokemon(body: PokemonSchema):
-    """Cadastrar um novo Pokémon na Pokédex"""
-    session = Session()
-    try:
-        pokemon = Pokemon(nome=body.nome, tipo=body.tipo, nivel=body.nivel)
-        logger.debug(f"Adicionando Pokémon de nome: '{pokemon.nome}'")
-        session.add(pokemon)
-        session.commit()
-        return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
-    except IntegrityError:
-        session.rollback()
-        return {"erro": "Pokémon já cadastrado"}, 409
-    except Exception as e:
-        session.rollback()
-        return {"erro": str(e)}, 400
+    with Session() as session:
+        try:
+            pokemon = Pokemon(nome=body.nome, tipo=body.tipo, nivel=body.nivel)
+            logger.debug(f"Adicionando Pokémon de nome: '{pokemon.nome}'")
+            session.add(pokemon)
+            session.commit()
+            return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
+        except IntegrityError:
+            session.rollback()
+            return {"erro": "Pokémon já cadastrado"}, 409
+        except Exception as e:
+            session.rollback()
+            return {"erro": str(e)}, 400
 
 # Listar todos (GET)
 @app.get('/pokemons', tags=[pokemon_tag],
          responses={"200": ListaPokemonsSchema, "400": ErrorSchema})
 def listar_pokemons():
-    """Listar todos os Pokémons cadastrados na Pokédex"""
-    session = Session()
-    pokemons = session.query(Pokemon).all()
-    return {
-        "pokemons": [PokemonViewSchema.from_orm(p).model_dump() for p in pokemons]
-    }, 200
+    with Session() as session:
+        pokemons = session.query(Pokemon).all()
+        return {
+            "pokemons": [PokemonViewSchema.from_orm(p).model_dump() for p in pokemons]
+        }, 200
 
 # Buscar por ID (GET)
 @app.get('/buscar_pokemon', tags=[pokemon_tag],
          responses={"200": PokemonViewSchema, "404": ErrorSchema})
 def buscar_pokemon(query: PokemonBuscaSchema):
-    """Buscar um Pokémon pelo ID"""
-    session = Session()
-    pokemon = session.query(Pokemon).filter(Pokemon.id == query.id).first()
-    if not pokemon:
-        return {"erro": "Pokémon não encontrado"}, 404
-    return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
+    with Session() as session:
+        pokemon = session.query(Pokemon).filter(Pokemon.id == query.id).first()
+        if not pokemon:
+            return {"erro": "Pokémon não encontrado"}, 404
+        return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
 
 # Deletar (DELETE)
 @app.delete('/deletar_pokemon', tags=[pokemon_tag],
             responses={"200": PokemonViewSchema, "404": ErrorSchema})
 def deletar_pokemon(query: PokemonBuscaSchema):
-    """Deletar um Pokémon da Pokédex pelo ID"""
-    session = Session()
-    pokemon = session.query(Pokemon).filter(Pokemon.id == query.id).first()
-    if not pokemon:
-        return {"erro": "Pokémon não encontrado"}, 404
-    session.delete(pokemon)
-    session.commit()
-    return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
+    with Session() as session:
+        pokemon = session.query(Pokemon).filter(Pokemon.id == query.id).first()
+        if not pokemon:
+            return {"erro": "Pokémon não encontrado"}, 404
+        session.delete(pokemon)
+        session.commit()
+        return PokemonViewSchema.from_orm(pokemon).model_dump(), 200
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
+
 
 
 
