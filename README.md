@@ -1,8 +1,15 @@
-# Minha API
+# Pokédex API
 
-Este pequeno projeto faz parte do material diático da Disciplina **Desenvolvimento Full Stack Básico** 
+Este pequeno projeto faz parte do trabalho de conclusão da Disciplina **Desenvolvimento Full Stack Básico** 
 
-O objetivo aqui é ilutsrar o conteúdo apresentado ao longo das três aulas da disciplina.
+API desenvolvida em Python com Flask para gerenciar Pokémons em uma Pokédex.  
+Permite cadastrar, listar, buscar e excluir Pokémons.
+
+## 🚀 Funcionalidades
+- `POST /cadastrar_pokemon` → Cadastrar novo Pokémon
+- `GET /pokemons` → Listar todos os Pokémons
+- `GET /buscar_pokemon?id=...` → Buscar Pokémon por ID
+- `DELETE /deletar_pokemon?id=...` → Excluir Pokémon por ID
 
 ---
 ## Como executar 
@@ -32,4 +39,4 @@ automaticamente após uma mudança no código fonte.
 (env)$ flask run --host 0.0.0.0 --port 5000 --reload
 ```
 
-Abra o [http://localhost:5000/#/](http://localhost:5000/#/) no navegador para verificar o status da API em execução.
+O servidor estará disponível em http://127.0.0.1:5000
